@@ -1,35 +1,52 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useHistory } from 'react-router-dom';
 import axios from "axios";
+import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
+
 
 const Login = () => {
   // make a post request to retrieve a token from the api
   // when you have handled the token, navigate to the BubblePage route
+  const history = useHistory();
+  const initialState = {
+    username: '',
+    password: ''
+  }
 
-  useEffect(()=>{
-    axios
-      .delete(`http://localhost:5000/api/colors/1`, {
-        headers:{
-          'authorization': "ahuBHejkJJiMDhmODZhZi0zaeLTQ4ZfeaseOGZgesai1jZWYgrTA07i73Gebhu98"
-        }
-      })
-      .then(res=>{
-        axios.get(`http://localhost:5000/api/colors`, {
-          headers:{
-            'authorization': ""
-          }
-        })
-        .then(res=> {
-          console.log(res);
-        });
+  const [credentials, setCredentials] = useState(initialState)
+
+  const changeHandler = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value })
+  };
+
+  const loginHandler = (e) => {
+    e.preventDefault();
+    axios.post('http://localhost:5000/api/login', credentials)
+      .then((res) => {
         console.log(res);
+        localStorage.setItem('token', res.data.payload);
+        history.push('/')
       })
-  });
+      .catch((err) => {console.log(err)});
+  };
 
   return (
     <>
       <h1>
         Welcome to the Bubble App!
-        <p>Build a login page here</p>
+        <Form onSubmit={loginHandler}>
+          <FormGroup>
+            <Label for="username">Username</Label>
+            <Input name="username" placeholder='Luke' value={credentials.username} onChange={changeHandler}></Input>
+          </FormGroup>
+
+          <FormGroup>
+            <Label for="password">Password</Label>
+            <Input name="password" placeholder='password' value={credentials.password} onChange={changeHandler}></Input>
+          </FormGroup>
+
+          <Button>Submit</Button>
+        </Form>
       </h1>
     </>
   );
